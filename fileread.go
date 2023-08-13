@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bufio"
+	"encoding/csv"
+	"io"
 	"log"
 	"os"
-	"strings"
+	"strconv"
 )
 
 func ReadFile(path string) []ZipCodes {
@@ -16,41 +17,32 @@ func ReadFile(path string) []ZipCodes {
 
 	defer file.Close()
 
-	sc := bufio.NewScanner(file)
-	//lines := make([]string, 0)
-
 	var zips []ZipCodes
 
-	i := 0
-	for sc.Scan() {
-		i++
-		var entries = make([]byte, 0)
-		inQuotes := false
-		for _, text := range sc.Text() {
-			if strings.Split(sc.Text(), ",")[0] == "65101" {
+	r := csv.NewReader(file)
 
-				if text == '"' && inQuotes {
-					inQuotes = false
-				}
+	for {
+		record, err := r.Read()
 
-				if text == '"' && !inQuotes {
-					entries = append(entries, byte(text))
-					inQuotes = true
-				}
-			}
+		if err == io.EOF {
+			break
 		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		lat, _ := strconv.ParseFloat(record[12], 64)
+		long, _ := strconv.ParseFloat(record[13], 64)
+
 		zip := ZipCodes{
-			Zip:    strings.Split(sc.Text(), ",")[0],
-			State:  strings.Split(sc.Text(), ",")[8],
-			City:   strings.Split(sc.Text(), ",")[3],
-			County: strings.Split(sc.Text(), ",")[7],
+			Zip:   record[0],
+			State: record[8],
+			Lat:   lat,
+			Long:  long,
 		}
-		if zip.Zip == "65101" {
-			//log.Println(zip.County)
-		}
-		//lines = append(lines, sc.Text())
-		zips = append(zips, zip)
 
+		zips = append(zips, zip)
 	}
 
 	return zips

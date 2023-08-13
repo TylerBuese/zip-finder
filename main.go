@@ -11,6 +11,6 @@ type ZipCodes struct {
 
 func main() {
 	path := "./zip_code_database.csv"
-	ReadFile(path)
+	zips := ReadFile(path)
 
 }
