@@ -36,10 +36,12 @@ func ReadFile(path string) []ZipCodes {
 		long, _ := strconv.ParseFloat(record[13], 64)
 
 		zip := ZipCodes{
-			Zip:   record[0],
-			State: record[8],
-			Lat:   lat,
-			Long:  long,
+			Zip:    record[0],
+			State:  record[6],
+			Lat:    lat,
+			Long:   long,
+			City:   record[3],
+			County: record[7],
 		}
 
 		zips = append(zips, zip)
