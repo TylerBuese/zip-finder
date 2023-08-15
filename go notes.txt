@@ -1,0 +1,444 @@
+go notes
+
+Every go program must start with a package declaration. It's a convention to make your main.go file's package main.
+Every go program must have a function named main. 
+    func defines a function
+    the full function looks like so
+        func main() {
+            ...
+        }
+We can run and compile our profile with go run .\file.go
+
+We can define a variable with the var keyword. We must define the type of variable
+    var data string
+    inherently, go requires something to be done with this variable, otherwise the program wont compile
+We can assign data to a variable like so
+    data = "Hello, world"
+    Even in this context, go won't compile since we're just assinging data - not using it. However, if we...
+        fmt.Println(data)
+    the program will compile
+
+We can assign a variable integer like so:
+    var i int
+    By default, int is your system spec, so a x64 system will default to int64
+
+We can create a function with a return type like so:
+    func saySomething() string {
+
+    }
+    the return type comes after the parameters
+
+Go has a short had assignment operator with :=
+    You can call a function and let Go infer the type based on the return type
+        whatWasSaid := saySomething() //whatWasSaid is now the result of saySomething
+
+We can import packages into our program with the import keyword
+
+We can create global (package level) variables by declaring a variable outside of our main function
+
+    package main
+
+    var global_variable String
+
+    func main() {...
+
+Go allows you to return any number of items from a function by wrapping all of your return types in ()
+
+    func saySomething() (string, string) {
+        return "something", ""
+    }
+
+    Then we can assign a variable to the result of the function with:
+         whatWasSaid, otherThing := saySomething()
+
+Go allows us to minipulate pointers
+    Pointers allow us to manipulate data in ways that a normal function scope would disallow.
+    To do so, we need to work within the confines of what a pointer knows
+        We must work with references of variables (using the &)
+        We must work with pointers to variables (using *)
+    Take the following example:
+        func main() {
+            var s string
+            s = "Green"             //S is assigned to Green
+            fmt.Println(s)          //prints "Green"
+            changeUsingPointers(&s) //Sends a reference to the variable *s as a parameter
+            fmt.Println(s)          //Prints "Red"
+        }
+
+        func changeUsingPointers(s *string) {
+            fmt.Println(s)          //prints the actual location of the variable in memory (hex number)
+            newValue := "Red"       
+            *s = newValue           //Sets the actual pointer in memory to "Red"
+        }
+    Even though we're not returning or assigning anything, we're still able to change the properties of data
+    in memory using pointers and value dereferencing.
+
+    In essence, we're telling Go to go to the memory addrses in *s and set the value to whatever is in the new value
+
+Go can infer types on initialized variables
+    var s = "bunch of text"
+        Go will infer that s is a string
+We can also shorthand an initialization like this: 
+    s := "what a bunch of text"
+        Has the same effect as var s = "..."
+    
+We can create our own data types with the struct keyword
+    type User struct {
+        FirstName string
+        LastName string
+        PhoneNumber string
+        Age int
+        BirthDate time.Time
+    }
+
+We can instantiate an object by using var user User, and then assigning each attribute as needed
+To short hand, we can do this: 
+    user := User {
+        FirstName: "Tyler",
+        LastName: "Buese,
+        ...
+    }
+    You must end your last object with a comma (,) else the compiler will yell at you
+
+Go has different syntax for declaring the visibilty of classes and functions.
+Namely, when we create a function in Go, the visibility of that function is determined by the casing of the name
+    CoolFunction is visible from outside your .go file (public)
+    coolFunction is only visible within your .go file (private)
+
+Go includes a way to add functions to structs called a reciever.
+    Take the below example
+
+    type myStruct struct {                       //The struct we're adding a function to
+        FirstName string
+    }
+
+    func (m *myStruct) printFirstName() string { //This is the function we're adding. We add the function
+        log.Println(m.FirstName)                 //by creating a pointer to the struct (see (m *myStruct))
+    }                                            //This lets us add additional functionality to our classes
+                                                 //By adding additional business logic  and other validation
+    func main() {
+        var myVar myStruct
+        myVar.FirstName = "Tyler"
+        myVar.printFirstName()                   //We can execute the function like this
+    }
+
+    Receivers in go should be accepted as a pointer, as it's best practice and makes things faster
+
+Go includes the ability to create maps. Maps in go and case-sensitive key-value pairs
+    Think of it as new Map<string, string>() in .net
+    They can be created like so:
+        myMap := make(map[string]string)
+
+        The syntax is broken down like this:
+
+        varName := make(map[index]value at index)
+
+        So with the example above, we can create an entry in our map like this:
+            myMap["Dog"] = "Piper"
+
+        And get the value of the entry in our map like this:
+            myMap["Dog"] //outputs piper
+        
+    Maps are useful in Go not only because they let you store key value data, but they're also fast and
+    immutable. Unlike pointers and structs, you don't have to pass them back and forth using pointers, maps
+    by default are pointers, so you know they'll always be changed on the other side.
+
+    Maps are not sorted, and must be looked up by key.
+
+Go also includes the ability to create strictly typed arrays, called slices.
+    We can create slices like so:
+        var myStrings []string
+
+    We can add an item to the slice with the append macro? function? What is it?
+        slice = append(slice, "Tyler") //We're setting slice equal to the result of append, which takes
+                                       //The current slice, and the new item as a parameter.
+
+    slices have lots of functions that interect with them, such as sort, making them very useful
+
+    We can shorthand create a slice like so
+        numbers := []int {1,3,2,4}
+
+    With slices we can define a range of elements to be returned
+        rangeOfNums := numbers[0:2] //Gets the first 3 numbers in the slice
+
+The way go does it's for each loop is called a range, and can be done like so:
+    animals := []string{"Dog", "cat", "horse", "cow"}
+
+	for i, animal := range animals {
+		log.Println(i, animal)
+	}
+
+    //_ is the blank identifier - it ignores that parameter
+	for _, animal := range animals {
+		log.Println(animal)
+	}
+
+    We can iterate over maps as well, and get the key and value like so:
+    for humanType, human := range people {  
+		log.Println(humanType, human)
+	}
+    
+    In go, a string is just a slice of bytes (aka rune), which can be seen by running this:
+
+    var line = "This is a string"
+
+	for _, s := range line {
+		log.Println(s)
+	}
+
+Go also supports interfaces, which are used the same way as other languages
+
+    type InterfaceName interface {
+        function() retrun type
+    }
+
+    type Animal interface {
+        Says() string
+        HasFourLegs bool
+    }
+
+Go supports the idea of packages, and calls them just that. Packages are imported using the import keyword
+    We can create our own package by using the command 
+        go   init <package_name>
+        e.g., go mod init github.com/tylerbuese/test
+    This creates a go.mod file in your running directory
+    The go mod file dictates where your module lives. It's a common practice to use your fully qualified
+    github url as the base, following by /<module name>
+    To import that module into a file, we just need to say import <module path>, as seen below
+        import (
+            "log"
+            "github.com/tylerbuese/test/helpers"
+        )
+
+Channels are a concept unique to Go. Channels are simply another way to send data from one part of your
+program to another - similar to how you pass parameters into a function.
+    We can instantiate a channel with the following syntax:
+        var_name := make(chan <type>)
+        e.g., intChan := make(chan int)
+    Channels are strictly typed
+    We can and should close channels using the close() function
+        defer close(intChan) //defer tells the following function to execute as soon as it leaves scope
+    
+    Channels allow you to asynchronously send information back and forth from one place in your app to another
+    See the following example:
+
+        const numPool = 10
+
+        func CalculateValue(ints chan int) {
+            r := helpers.RandomNum(numPool)
+            ints <- r   //Adds the result of random numbers to the ints channel 
+                        //Channels are like arrays, they consume any number of strictly typed items
+        }
+
+        func main() {
+            intChan := make(chan int) //Creates the channel
+            defer close(intChan) //closes the channel after the function leaves scope
+                                 //Since we're deferring it's closure, we can still manipulate the channel
+                                 //after we call for it to be closed
+
+            go CalculateValue(intChan) //We use the "go" keyword, which executes a function concurrently with other
+                                       //functions. It can run on any thread. Seems similar to async/await
+
+            num := <- intChan     //Add the result of the channel into a variable
+            log.Println(num)      //Log the result
+        } 
+
+Go has the native ability to read and write json, similar to how you would in other languages
+    Given a json string, we can marshall/unmarshall that string to a struct in go
+    In our type, we need to define what to expect when we try to map to a json string, as defined below
+
+    type Person struct {
+        FirstName string `json:"first_name"`
+        LastName string `json:"last_name"`
+        Age int `json:"age"`
+    }
+
+    jsonString := `[
+	{
+        "first_name": "Tyler",
+        "last_name": "Buese",
+        "age": 26
+    },
+	{
+        "first_name": "Olivia",
+        "last_name": "Buese",
+        "age": 2
+    }
+	]`
+
+    We can unmarshall (map string to object) by using the json.Unmarshall function
+        Unmarshall takes two parameters - a slice of bytes and the destination of the mapping
+        Take the following example
+
+            var data []Person //Instantiates the place for us to place the data
+
+            err := json.Unmarshal([]byte(jsonString), &data) //Converts the string to a slice of bytes
+                                                            //Pass a reference to your destination
+            if err != nil {                                  //Checks if error is null or not
+                log.Println("Error unmarshalling json", err)
+            }
+
+            log.Printf("data: %v", data)                     //%v detects the struct/interface and formats accordingly
+
+        To take an object and marshall (map object to string)
+
+            var people []Person
+
+            person := Person{
+                FirstName: "Tyler",
+                LastName:  "Buese",
+                Age:       26,
+            }
+
+            people = append(people, person)
+
+            person2 := Person{
+                FirstName: "Olivia",
+                LastName:  "Buese",
+                Age:       2,
+            }
+
+            people = append(people, person2)
+
+            jString, err := json.Marshal(people)        //We can also use MarshallIndent to get readable json
+            if err != nil {
+                log.Println("Error marshalling: ", err)
+            }
+
+            fmt.Println(string(jString))
+
+Go has built in testing by adding a new file called <file_name>_test.go
+    e.g., main_test.go
+
+    Inside our test file, we define tests by creating functions that start with the word "Test".
+        e.g., 
+            import "testing"
+            func TestDivide(t *testing.T) { //The only param must be *testing.T, which is a package
+                //In our tests we should attempt certain failable operations   
+            }
+    To run a test, simply execute "go test" in your terminal
+        we can tack on -v to see the details of the test
+    Ideally we wouldn't want to create separate functions for every test. Rather, we want to generate some data
+    to test against and write tests against that data set
+    We can do that by doing something like this:
+        var tests = []struct {          //Here, we're defining a slice of structs, and creating two
+            name     string             //objects - invalid and valid data.
+            dividend float32
+            divisor  float32
+            expected float32
+            isErr    bool
+        } {
+            {"valid-data", 100.00, 10.0, 10.0, false},
+            {"invalid-data", 100.00, 0, 0, false},
+        }
+    Then in one function/test, iterate over all of these slices and produce a result.
+    To make a test pass, it needs to get to the end of the function. To make a test fail, you must use
+    t.Error or t.Errorf to produce an error, as seen in the example below
+        func TestDivision(t *testing.T) {
+            for _, div := range tests {
+                got, err := divide(div.dividend, div.divisor)
+                if div.isErr {
+                    if err == nil {
+                        t.Error("Expected error, but didn't get one")
+                    }
+                } else {
+                    if err != nil {
+                        t.Error("Did not expect error", err.Error())
+                    }
+                }
+
+                if got != div.expected {
+                    t.Errorf("expected %f but got %f", div.expected, got)
+                }
+            }
+        }
+
+Go was built from the ground up with http and web in mind, and has a built in package for
+writing web apps.
+
+The http library contains the majority of the functions we would need
+
+To create a web API in go, we need to do a few things... See the example below.
+
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+		_, err := fmt.Fprintf(w, "{}")
+		log.Println(r.Method)
+
+		if err != nil {
+
+		}
+	})
+
+	_ = http.ListenAndServe(":8080", nil)
+
+First, we need to have any number of http.HandleFun functions. We define the endpoint, and 
+an inline function with the response to be written, and the request. The format for these
+is always the same. 
+
+Second, we need to use the http.ListenAndServe or http.ListenAndServeTLS functions. This
+function allows us to accept requests and response to them.
+
+We can respond to a request by writing to the http.ResponseWriter stream. This can be seen with
+fmt.Fprintf(w, "text")
+
+We can explicitly ignore unhandled errors by adding _ = to a function call. I.e., 
+    _ = http.ListenAndServe(":8080", nil)
+
+The ideal way we can create endpoints in a go web app is by creating handler functions for
+each page we want to serve. e.g.,
+
+func index(w http.ResponseWriter, r *http.Request) {
+	_, err := fmt.Fprintf(w, string("Hello, world"))
+
+	log.Println(r.Method)
+
+	if err != nil {
+
+	}
+}
+
+func main() {
+	http.HandleFunc("/", index)
+	http.HandleFunc("/api/v1/", zipfinder)
+	_ = http.ListenAndServe(":8080", nil)
+}
+
+Go supports the idea of HTML tempaltes, and can respond with HTML. We can response with
+html by doing the following:
+    Create an html page somewhere in your directory
+    use the template.ParseFiles() function to parse the html
+    write the response to the response writer stream. 
+
+Go also supports HTML layout templating, meaning we can reuse certain HTML boilerplate.
+    We can do this by adding two directives to our HTML page - one at the top and one at the bottom
+    First, create a base.layout.html file, and insert some boilerplate html
+    At the top of our page, we say {{define "base"}} 
+        "base" targets the base.layout file
+    Then, at the bottom we say {{end}}
+        This tells the go compiler to stop the templating there.
+    Finally, we add where we want our content to go. We do that by adding another directive
+        In the body of our html, we add {{block "content" .}}
+            Doesn't need to be content - can be named whatever
+        Followed by an {{end}}
+
+    To create a html file to put into a template, we must...
+        Create the desired html file
+        At the beginning, add {{template "base" .}}
+            There is NO closing tag on this directive
+        Then, add a define directive with a closing tag, and insert your templated HTML inside of it
+            {{define "content"}}
+                <h1>This is templated html</h1>
+            {{end}}
+        
+    Lastly, to get the html to appear in a browser, we need to ensure Go knows about our template.
+        In the template.ParseFiles() function, we need to add a second parameter and point 
+        to our base layout file.
+            parsedTemplate, _ := template.ParseFiles("./templates/"+t) //before
+            parsedTemplate, _ := template.ParseFiles("./templates/"+t, "./templates/base.layout.html") //after
+
+When serving files, it's ideal to have a template cache to store the html so you don't have to 
+continually read the html from disk - saving it in memory is a much faster process.
+    see https://www.udemy.com/course/building-modern-web-applications-with-go/learn/lecture/32937232#overview for more information
+
+
