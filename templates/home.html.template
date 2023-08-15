@@ -1,6 +1,6 @@
 {{template "base" .}}
 
 {{define "content"}}
-a
+a a a
 {{end}}
 

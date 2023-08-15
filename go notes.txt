@@ -105,7 +105,7 @@ Namely, when we create a function in Go, the visibility of that function is dete
     CoolFunction is visible from outside your .go file (public)
     coolFunction is only visible within your .go file (private)
 
-Go includes a way to add functions to structs called a reciever.
+Go includes a way to add functions to structs called a receiver.
     Take the below example
 
     type myStruct struct {                       //The struct we're adding a function to
@@ -441,4 +441,103 @@ When serving files, it's ideal to have a template cache to store the html so you
 continually read the html from disk - saving it in memory is a much faster process.
     see https://www.udemy.com/course/building-modern-web-applications-with-go/learn/lecture/32937232#overview for more information
 
+
+As touched on before, Go allows us to add receivers to our functions that give us access to elements within a struct.
+Take the following example:
+    Say we have an in-memory configuration that functions need to access - rather than using DI or another pattern to 
+    access the items within that configuration, we can add a receiver to that function that accepts a pointer to that struct.
+
+    type Respository struct {
+        App *AppConfig
+    }
+
+    type AppConfig struct {
+        TemplateCache map[string]*template.Template
+    }
+         vvvvvvvvvvvvvvvv
+    func (m *Respository) index(w http.ResponseWriter, r *http.Request) {
+        RenderTemplate(w, "home.html.template")
+
+    }
+
+    We accept (m *Respository) in the function, and can now access anything within the Respository struct
+    in memory by using m.App.*
+
+    Then, anywhere we want to use our new function with the receiver, we need to initialize a new struct that returns
+    a pointer to the struct, and call our function via that object. i.e., 
+
+    *** repo.go ***
+
+    package main
+
+    var Repo *Respository
+
+    type AppConfig struct {
+        TemplateCache map[string]*template.Template
+    }
+
+    type Respository struct {
+        UseCache bool
+        App *AppConfig
+    }
+
+    func NewRepo(a *AppConfig) *Respository {
+        return &Respository{
+            App: a,
+        }
+    }
+
+    func NewHandlers(r *Respository) {
+        Repo = r
+    }
+
+    *** end ***
+
+    *** main.go ***
+
+    package main
+
+    import (
+        "log"
+        "net/http"
+    )
+
+    type ZipCodes struct {
+        Zip    string
+        City   string
+        State  string
+        Lat    float64
+        Long   float64
+        County string
+    }
+
+    var path = "./zip_code_database.csv"
+    var zips = ReadFile(path)
+
+    const port = ":8080"
+
+    func main() {
+        var app AppConfig
+
+        cache, err := createTemplateCache()
+
+        if err != nil {
+            log.Fatal("Cannot create template cache", err)
+        }
+
+        app.TemplateCache = cache
+
+        NewTemplates(&app)
+
+        repo := NewRepo(&app)
+        NewHandlers(repo)
+
+        http.HandleFunc("/home", repo.index) //must call via repo.index, not just index
+        http.HandleFunc("/api/v1/", zipfinder)
+        log.Println("Starting application on port", port)
+        _ = http.ListenAndServe(port, nil)
+
+    }
+
+    *** end ***
 
