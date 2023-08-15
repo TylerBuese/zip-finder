@@ -24,7 +24,7 @@ var zips = ReadFile(path)
 const port = ":8080"
 
 func main() {
-	//http.HandleFunc("/", index)
+	http.HandleFunc("/home", index)
 	http.HandleFunc("/api/v1/", zipfinder)
 	log.Println("Starting application on port", port)
 	_ = http.ListenAndServe(port, nil)
@@ -32,14 +32,7 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-
-	_, err := fmt.Fprintf(w, string("Hello, world"))
-
-	log.Println(r.Method)
-
-	if err != nil {
-
-	}
+	RenderTemplate(w, "home.html.template")
 
 }
 
@@ -47,6 +40,7 @@ func zipfinder(w http.ResponseWriter, r *http.Request) {
 	zip := r.URL.Query().Get("zip")
 	rad := r.URL.Query().Get("radius")
 	calcType := r.URL.Query().Get("type")
+	w.Header().Set("Content-Type", "application/json")
 
 	if zip == "" || rad == "" || calcType == "" {
 		w.WriteHeader(400)
