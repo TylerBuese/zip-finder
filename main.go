@@ -20,16 +20,10 @@ var zips = ReadFile(path)
 const port = ":8080"
 
 func main() {
-	var app AppConfig
-
-	cache, err := createTemplateCache()
-
-	if err != nil {
-		log.Fatal("Cannot create template cache", err)
+	app := AppConfig{
+		TemplateCache: nil,
+		UseCache:      false,
 	}
-
-	app.TemplateCache = cache
-	app.UseCache = false
 
 	NewTemplates(&app)
 
@@ -41,7 +35,7 @@ func main() {
 		Handler: routes(&app),
 	}
 
-	err = serv.ListenAndServe()
+	err := serv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
