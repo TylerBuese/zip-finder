@@ -1,6 +1,23 @@
 {{template "base" .}}
 
 {{define "content"}}
-a a a
+<div>
+    <label>Search zip codes!</label>
+
+    <div>
+        <div>
+            <label for="zipcode">Zip Code</label>
+            <input id="zipcode" class="border-2"/>
+        </div>
+        <div>
+            <label>Radius</label>
+            <input class="border-2">
+        </div>
+        <select>
+            <option>Miles</option>
+            <op
+        </select>
+    </div>
+</div>
 {{end}}
 
